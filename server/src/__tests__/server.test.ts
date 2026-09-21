@@ -6,6 +6,7 @@ import { fileURLToPath, pathToFileURL } from 'node:url'
 import * as LSP from 'vscode-languageserver/node'
 import { TextDocument } from 'vscode-languageserver-textdocument'
 
+import { describeIfExecutable } from '../../../testing/external-tools'
 import {
   FIXTURE_DOCUMENT,
   FIXTURE_FOLDER,
@@ -327,7 +328,8 @@ describe('server', () => {
     ])
   })
 
-  describe('onCodeAction', () => {
+  // Requires a real ShellCheck executable; skipped when it is not installed.
+  describeIfExecutable('shellcheck')('onCodeAction', () => {
     it('responds to onCodeAction', async () => {
       const { connection, server } = await initializeServer()
       const document = FIXTURE_DOCUMENT.COMMENT_DOC

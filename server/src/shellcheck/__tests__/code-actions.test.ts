@@ -4,6 +4,7 @@ import * as LSP from 'vscode-languageserver/node'
 import { TextDocument } from 'vscode-languageserver-textdocument'
 import { Parser } from 'web-tree-sitter'
 
+import { describeIfExecutable } from '../../../../testing/external-tools'
 import { initializeParser } from '../../parser'
 import { getCodeActions } from '../code-actions'
 import { ShellCheckResult } from '../types'
@@ -73,7 +74,8 @@ function apply(document: TextDocument, action: LSP.CodeAction): string {
   return TextDocument.applyEdits(document, action.edit!.changes![URI])
 }
 
-describe('ShellCheck suppression actions', () => {
+// Lints with a real ShellCheck executable; skipped when it is not installed.
+describeIfExecutable('shellcheck')('ShellCheck suppression actions', () => {
   it.each([
     ['simple command', 'echo "$foo"', '# shellcheck disable=SC2154\necho "$foo"'],
     [

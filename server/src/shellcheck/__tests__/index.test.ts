@@ -1,6 +1,7 @@
 import * as path from 'path'
 import { TextDocument } from 'vscode-languageserver-textdocument'
 
+import { itIfExecutable } from '../../../../testing/external-tools'
 import { FIXTURE_DOCUMENT, FIXTURE_FOLDER } from '../../../../testing/fixtures'
 import { Logger } from '../../util/logger'
 import { Linter } from '../index'
@@ -66,7 +67,7 @@ describe('linter', () => {
     )
   })
 
-  it('should lint when shellcheck is present', async () => {
+  itIfExecutable('shellcheck')('should lint when shellcheck is present', async () => {
     // prettier-ignore
     const shell = [
       '#!/bin/bash',
@@ -191,7 +192,7 @@ describe('linter', () => {
     `)
   })
 
-  it('should debounce the lint requests', async () => {
+  itIfExecutable('shellcheck')('should debounce the lint requests', async () => {
     const linter = new Linter({
       cwd: FIXTURE_FOLDER,
       executablePath: 'shellcheck',
@@ -211,25 +212,30 @@ describe('linter', () => {
     })
   })
 
-  it('should correctly follow sources with correct cwd', async () => {
-    const [result] = await getLintingResult({
-      cwd: FIXTURE_FOLDER,
-      document: FIXTURE_DOCUMENT.SHELLCHECK_SOURCE,
-    })
+  itIfExecutable('shellcheck')(
+    'should correctly follow sources with correct cwd',
+    async () => {
+      const [result] = await getLintingResult({
+        cwd: FIXTURE_FOLDER,
+        document: FIXTURE_DOCUMENT.SHELLCHECK_SOURCE,
+      })
 
-    expect(result).toEqual({
-      codeActions: {},
-      diagnostics: [],
-    })
-  })
+      expect(result).toEqual({
+        codeActions: {},
+        diagnostics: [],
+      })
+    },
+  )
 
-  it('should fail to follow sources with incorrect cwd', async () => {
-    const [result] = await getLintingResult({
-      cwd: path.resolve(path.join(FIXTURE_FOLDER, '../')),
-      document: FIXTURE_DOCUMENT.SHELLCHECK_SOURCE,
-    })
+  itIfExecutable('shellcheck')(
+    'should fail to follow sources with incorrect cwd',
+    async () => {
+      const [result] = await getLintingResult({
+        cwd: path.resolve(path.join(FIXTURE_FOLDER, '../')),
+        document: FIXTURE_DOCUMENT.SHELLCHECK_SOURCE,
+      })
 
-    expect(result).toMatchInlineSnapshot(`
+      expect(result).toMatchInlineSnapshot(`
       {
         "codeActions": {},
         "diagnostics": [
@@ -282,19 +288,23 @@ describe('linter', () => {
         ],
       }
     `)
-  })
+    },
+  )
 
-  it('should follow sources with incorrect cwd if the execution path is passed', async () => {
-    const [result] = await getLintingResult({
-      cwd: path.resolve(path.join(FIXTURE_FOLDER, '../')),
-      document: FIXTURE_DOCUMENT.SHELLCHECK_SOURCE,
-      sourcePaths: [path.resolve(FIXTURE_FOLDER)],
-    })
-    expect(result).toEqual({
-      codeActions: {},
-      diagnostics: [],
-    })
-  })
+  itIfExecutable('shellcheck')(
+    'should follow sources with incorrect cwd if the execution path is passed',
+    async () => {
+      const [result] = await getLintingResult({
+        cwd: path.resolve(path.join(FIXTURE_FOLDER, '../')),
+        document: FIXTURE_DOCUMENT.SHELLCHECK_SOURCE,
+        sourcePaths: [path.resolve(FIXTURE_FOLDER)],
+      })
+      expect(result).toEqual({
+        codeActions: {},
+        diagnostics: [],
+      })
+    },
+  )
 
   it('should handle non-file URI schemes gracefully', async () => {
     const shell = ['#!/bin/bash', 'echo "hello"'].join('\n')

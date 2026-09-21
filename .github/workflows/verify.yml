@@ -3,7 +3,34 @@ name: Verify changes
 on: [pull_request]
 
 jobs:
-  verify:
+  # Shared offline gate: no external tools (ShellCheck/shfmt) are installed.
+  # Runs format/type checks, unit tests, the server build, a real stdio LSP
+  # smoke session and a package content check, and proves that optional
+  # tools degrade gracefully. Tests requiring the real tools are skipped
+  # here and covered by the "verify-with-tools" job below.
+  verify-offline:
+
+    runs-on: ubuntu-latest
+
+    name: verify (offline)
+
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: pnpm/action-setup@v6
+
+      - name: Use Node.js 22.x
+        uses: actions/setup-node@v7
+        with:
+          cache: "pnpm"
+          node-version: 22.x
+
+      - name: Verify offline
+        run: pnpm run verify:offline
+
+  # Tests that genuinely need the external tools (ShellCheck and both the
+  # distro and latest shfmt releases).
+  verify-with-tools:
 
     runs-on: ubuntu-latest
 
@@ -53,12 +80,13 @@ jobs:
 
       - run: pnpm install --frozen-lockfile
 
-      - name: Verify changes
+      - name: Verify changes (with external tools)
         run: pnpm verify:bail
 
   all-done:
     needs:
-      - verify
+      - verify-offline
+      - verify-with-tools
     runs-on: ubuntu-latest
     steps:
     - run: echo "All jobs completed"

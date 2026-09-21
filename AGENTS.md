@@ -37,6 +37,13 @@
 - For code or dependency changes, run `pnpm verify:bail` before handoff. This is
   the CI entry point: lint without autofix, compile both packages, and tests with
   coverage. Report any checks that could not run and why.
+- For a full offline check, run `pnpm run verify:offline`. It installs locked
+  dependencies, then runs lint, typecheck and unit tests, builds the server,
+  verifies the bundled tree-sitter wasm against `server/parser.info`, runs a
+  real stdio LSP smoke session without ShellCheck/shfmt/man on PATH, and checks
+  the publishable package contents. Results land in `artifacts/` (see
+  `artifacts/verify-manifest.json`). Tests that require ShellCheck or shfmt
+  skip automatically when the tools are not installed.
 - `pnpm compile` also copies `get-options.sh` into the server output; use it when
   validating the build rather than invoking TypeScript alone.
 - `pnpm lint` and `pnpm verify` apply autofixes. Use `pnpm lint:bail` for a lint
