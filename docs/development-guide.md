@@ -54,6 +54,18 @@ To support a good develop workflow we set up [eslint][eslint], [Prettier][pretti
     pnpm test
     pnpm test:coverage
 
+For an offline end-to-end check (lint and typecheck, unit tests that do not
+need external tools, server build, a real stdio LSP smoke session against
+`testing/verify-workspace`, and publish package content verification) run:
+
+    pnpm run verify:offline
+
+It requires no network access and no ShellCheck/shfmt/man installation — the
+smoke session verifies that those optional capabilities degrade gracefully.
+Results are written to `artifacts/verify-manifest.json` and
+`artifacts/lsp-smoke-session.json`. The test suites that do require the
+external tools run in a separate CI job.
+
 ## Working on the client
 
 The extension requires VS Code 1.91 or newer, whose bundled Node.js runtime meets
