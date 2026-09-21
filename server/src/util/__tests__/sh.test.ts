@@ -1,6 +1,7 @@
 /* eslint-disable no-useless-escape */
 import * as ChildProcess from 'child_process'
 
+import { itIfShellDocumentation } from '../../../../testing/tools'
 import * as sh from '../sh'
 
 describe('execShellScript', () => {
@@ -22,25 +23,31 @@ describe('getDocumentation', () => {
     expect(result).toEqual(null)
   })
 
-  it('returns documentation string for a known builtin', async () => {
+  itIfShellDocumentation('returns documentation string for a known builtin', async () => {
     const result = (await sh.getShellDocumentation({ word: 'exit' })) as string
     const firstLine = result.split('\n')[0]
     expect(firstLine).toEqual('exit: exit [n]')
   })
 
-  it('returns documentation string (man page) for known command', async () => {
-    const result = (await sh.getShellDocumentation({ word: 'ls' })) as string
-    const lines = result.split('\n')
-    expect(lines[0]).toEqual('NAME')
-    expect(lines[1]).toContain('list directory contents')
-  })
+  itIfShellDocumentation(
+    'returns documentation string (man page) for known command',
+    async () => {
+      const result = (await sh.getShellDocumentation({ word: 'ls' })) as string
+      const lines = result.split('\n')
+      expect(lines[0]).toEqual('NAME')
+      expect(lines[1]).toContain('list directory contents')
+    },
+  )
 
-  it('returns the external manual for an absolute command path', async () => {
-    const result = await sh.getShellDocumentation({ word: '/bin/ls' })
-    expect(result).toContain('list directory contents')
-  })
+  itIfShellDocumentation(
+    'returns the external manual for an absolute command path',
+    async () => {
+      const result = await sh.getShellDocumentation({ word: '/bin/ls' })
+      expect(result).toContain('list directory contents')
+    },
+  )
 
-  it('normalizes absolute paths before checking spaces', async () => {
+  itIfShellDocumentation('normalizes absolute paths before checking spaces', async () => {
     const result = await sh.getShellDocumentation({ word: '/opt/My Tools/ls' })
     expect(result).toContain('list directory contents')
   })

@@ -50,3 +50,6 @@ Pods/
 .parcel-cache/
 .vite/
 .turbo/
+
+# Offline verification output
+artifacts/

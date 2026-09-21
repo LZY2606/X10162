@@ -13,6 +13,7 @@
     "test:watch": "pnpm run test --watch",
     "verify": "pnpm lint && pnpm compile && pnpm run test",
     "verify:bail": "pnpm lint:bail && pnpm compile && pnpm test:coverage",
+    "verify:offline": "node scripts/verify-offline/run.mjs",
     "reinstall-server": "npm uninstall -g bash-language-server && pnpm compile && npm i -g ./server",
     "link-server": "pnpm compile && node scripts/link-server.mjs",
     "postinstall": "pnpm --dir=vscode-client install"

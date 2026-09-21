@@ -2,6 +2,7 @@ import { FormattingOptions } from 'vscode-languageserver/node'
 import { TextDocument } from 'vscode-languageserver-textdocument'
 
 import { FIXTURE_DOCUMENT, FIXTURE_FOLDER } from '../../../../testing/fixtures'
+import { describeIfShfmt } from '../../../../testing/tools'
 import { ShfmtConfig } from '../../config'
 import { Logger } from '../../util/logger'
 import { Formatter } from '../index'
@@ -70,7 +71,9 @@ describe('formatter', () => {
       ),
     )
   })
+})
 
+describeIfShfmt('formatter with shfmt installed', () => {
   it('should throw when formatting fails', async () => {
     await expect(async () => {
       await getFormattingResult({ document: FIXTURE_DOCUMENT.PARSE_PROBLEMS })

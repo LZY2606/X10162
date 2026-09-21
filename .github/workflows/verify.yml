@@ -3,11 +3,43 @@ name: Verify changes
 on: [pull_request]
 
 jobs:
-  verify:
-
+  verify-offline:
     runs-on: ubuntu-latest
 
-    name: verify (${{ matrix.shfmt-version }} shfmt)
+    name: verify (offline)
+
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: pnpm/action-setup@v6
+
+      - name: Use Node.js 22.x
+        uses: actions/setup-node@v7
+        with:
+          cache: "pnpm"
+          node-version: 22.x
+
+      - run: pnpm install --frozen-lockfile
+
+      # Shared offline verification: lint, typecheck, unit tests that do not
+      # need external tools, server build, a real stdio LSP smoke session with
+      # optional tools (ShellCheck, shfmt, man) unavailable, and package
+      # content checks. Writes artifacts/verify-manifest.json.
+      - name: Verify changes (offline)
+        run: pnpm run verify:offline
+
+      - name: Upload verification manifest
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: verify-manifest
+          path: artifacts/
+          if-no-files-found: ignore
+
+  external-tools:
+    runs-on: ubuntu-latest
+
+    name: external tools (${{ matrix.shfmt-version }} shfmt)
 
     strategy:
       fail-fast: false
@@ -53,12 +85,16 @@ jobs:
 
       - run: pnpm install --frozen-lockfile
 
-      - name: Verify changes
-        run: pnpm verify:bail
+      # With the external executables installed, the tool-dependent tests
+      # (which skip themselves when a tool is missing, see testing/tools.ts)
+      # run for real. The offline job covers everything else.
+      - name: Run the test suite with external tools available
+        run: pnpm exec jest --runInBand
 
   all-done:
     needs:
-      - verify
+      - verify-offline
+      - external-tools
     runs-on: ubuntu-latest
     steps:
     - run: echo "All jobs completed"

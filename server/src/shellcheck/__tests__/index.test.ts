@@ -2,6 +2,7 @@ import * as path from 'path'
 import { TextDocument } from 'vscode-languageserver-textdocument'
 
 import { FIXTURE_DOCUMENT, FIXTURE_FOLDER } from '../../../../testing/fixtures'
+import { describeIfShellcheck } from '../../../../testing/tools'
 import { Logger } from '../../util/logger'
 import { Linter } from '../index'
 
@@ -65,7 +66,9 @@ describe('linter', () => {
       ),
     )
   })
+})
 
+describeIfShellcheck('linter with ShellCheck installed', () => {
   it('should lint when shellcheck is present', async () => {
     // prettier-ignore
     const shell = [

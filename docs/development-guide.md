@@ -54,6 +54,19 @@ To support a good develop workflow we set up [eslint][eslint], [Prettier][pretti
     pnpm test
     pnpm test:coverage
 
+### Offline verification
+
+`pnpm run verify:offline` runs the full offline pipeline used by CI: lint and
+typecheck, the Jest suite, the server build, a real stdio LSP smoke session
+against the fixed workspace in `testing/verify-workspace`, and a check of the
+publishable package contents (including the bundled tree-sitter wasm). It
+requires only locked dependencies (`pnpm install --frozen-lockfile`) and works
+without network access or the optional external tools: ShellCheck, shfmt and
+man page lookups degrade gracefully, and tests that need those tools skip
+themselves (see `testing/tools.ts`). Results are written to
+`artifacts/verify-manifest.json` (plus the LSP transcript and package content
+digest alongside it) with stable ordering and no absolute paths or timestamps.
+
 ## Working on the client
 
 The extension requires VS Code 1.91 or newer, whose bundled Node.js runtime meets

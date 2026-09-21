@@ -14,6 +14,7 @@ import {
   updateSnapshotUris,
 } from '../../../testing/fixtures'
 import { getMockConnection } from '../../../testing/mocks'
+import { describeIfShellcheck, itIfShellDocumentation } from '../../../testing/tools'
 import Analyzer from '../analyser'
 import LspServer, { getCommandOptions } from '../server'
 import { Linter } from '../shellcheck'
@@ -327,7 +328,7 @@ describe('server', () => {
     ])
   })
 
-  describe('onCodeAction', () => {
+  describeIfShellcheck('onCodeAction', () => {
     it('responds to onCodeAction', async () => {
       const { connection, server } = await initializeServer()
       const document = FIXTURE_DOCUMENT.COMMENT_DOC
@@ -924,7 +925,7 @@ describe('server', () => {
   })
 
   describe('onCompletionResolve', () => {
-    it('resolves documentation for buitins', async () => {
+    itIfShellDocumentation('resolves documentation for buitins', async () => {
       const { connection } = await initializeServer({ rootPath: REPO_ROOT_FOLDER })
 
       const onCompletionResolve = connection.onCompletionResolve.mock.calls[0][0]
@@ -1329,7 +1330,7 @@ describe('server', () => {
         {} as any,
       )
     }
-    it('responds with documentation for command', async () => {
+    itIfShellDocumentation('responds with documentation for command', async () => {
       const result = await getHoverResult(FIXTURE_URI.INSTALL, {
         // rm
         line: 25,
@@ -1387,40 +1388,46 @@ describe('server', () => {
       `)
     })
 
-    it('returns executable documentation if the function is not redefined', async () => {
-      const result1 = await getHoverResult(FIXTURE_URI.OVERRIDE_SYMBOL, {
-        line: 2,
-        character: 1,
-      })
-      expect(result1).toEqual({
-        contents: {
-          kind: 'markdown',
-          value: expect.stringContaining('list directory contents'),
-        },
-      })
+    itIfShellDocumentation(
+      'returns executable documentation if the function is not redefined',
+      async () => {
+        const result1 = await getHoverResult(FIXTURE_URI.OVERRIDE_SYMBOL, {
+          line: 2,
+          character: 1,
+        })
+        expect(result1).toEqual({
+          contents: {
+            kind: 'markdown',
+            value: expect.stringContaining('list directory contents'),
+          },
+        })
 
-      // return null same result if the cursor is on the arguments
-      const result2 = await getHoverResult(FIXTURE_URI.OVERRIDE_SYMBOL, {
-        line: 2,
-        character: 3,
-      })
-      expect(result2).toEqual(null)
-    })
+        // return null same result if the cursor is on the arguments
+        const result2 = await getHoverResult(FIXTURE_URI.OVERRIDE_SYMBOL, {
+          line: 2,
+          character: 3,
+        })
+        expect(result2).toEqual(null)
+      },
+    )
 
-    it('responds with documentation even if parsing fails', async () => {
-      const result = await getHoverResult(FIXTURE_URI.MISSING_NODE, {
-        // echo
-        line: 11,
-        character: 2,
-      })
+    itIfShellDocumentation(
+      'responds with documentation even if parsing fails',
+      async () => {
+        const result = await getHoverResult(FIXTURE_URI.MISSING_NODE, {
+          // echo
+          line: 11,
+          character: 2,
+        })
 
-      expect(result).toEqual({
-        contents: {
-          kind: 'markdown',
-          value: expect.stringContaining('echo'),
-        },
-      })
-    })
+        expect(result).toEqual({
+          contents: {
+            kind: 'markdown',
+            value: expect.stringContaining('echo'),
+          },
+        })
+      },
+    )
 
     it.skip('returns documentation from explainshell', async () => {
       // Skipped as this requires a running explainshell server (and the code is hard to mock)
