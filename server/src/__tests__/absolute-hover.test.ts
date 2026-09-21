@@ -5,8 +5,12 @@ import { join } from 'node:path'
 import { TextDocument } from 'vscode-languageserver-textdocument'
 
 import { getMockConnection } from '../../../testing/mocks'
+import { MAN_AVAILABLE } from '../../../testing/tools'
 import LspServer from '../server'
 import * as sh from '../util/sh'
+
+// Looking up the manual of an executable requires the system man pages.
+const itMan = MAN_AVAILABLE ? it : it.skip
 
 it('looks up documentation for commands invoked by absolute path', async () => {
   const documentation = jest
@@ -50,7 +54,7 @@ it('looks up documentation for commands invoked by absolute path', async () => {
   }
 })
 
-it('documents a quoted command path containing spaces', async () => {
+itMan('documents a quoted command path containing spaces', async () => {
   const directory = await mkdtemp(join(tmpdir(), 'bash-lsp tools-'))
   try {
     const command = join(directory, 'ls')

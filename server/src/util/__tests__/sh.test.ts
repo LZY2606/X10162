@@ -1,7 +1,11 @@
 /* eslint-disable no-useless-escape */
 import * as ChildProcess from 'child_process'
 
+import { MAN_AVAILABLE } from '../../../../testing/tools'
 import * as sh from '../sh'
+
+// Manual page lookups require the system man pages.
+const itMan = MAN_AVAILABLE ? it : it.skip
 
 describe('execShellScript', () => {
   it('resolves if childprocess sends close signal', async () => {
@@ -28,19 +32,19 @@ describe('getDocumentation', () => {
     expect(firstLine).toEqual('exit: exit [n]')
   })
 
-  it('returns documentation string (man page) for known command', async () => {
+  itMan('returns documentation string (man page) for known command', async () => {
     const result = (await sh.getShellDocumentation({ word: 'ls' })) as string
     const lines = result.split('\n')
     expect(lines[0]).toEqual('NAME')
     expect(lines[1]).toContain('list directory contents')
   })
 
-  it('returns the external manual for an absolute command path', async () => {
+  itMan('returns the external manual for an absolute command path', async () => {
     const result = await sh.getShellDocumentation({ word: '/bin/ls' })
     expect(result).toContain('list directory contents')
   })
 
-  it('normalizes absolute paths before checking spaces', async () => {
+  itMan('normalizes absolute paths before checking spaces', async () => {
     const result = await sh.getShellDocumentation({ word: '/opt/My Tools/ls' })
     expect(result).toContain('list directory contents')
   })

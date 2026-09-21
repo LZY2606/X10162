@@ -14,11 +14,17 @@ import {
   updateSnapshotUris,
 } from '../../../testing/fixtures'
 import { getMockConnection } from '../../../testing/mocks'
+import { MAN_AVAILABLE, SHELLCHECK_AVAILABLE } from '../../../testing/tools'
 import Analyzer from '../analyser'
 import LspServer, { getCommandOptions } from '../server'
 import { Linter } from '../shellcheck'
 import { CompletionItemDataType } from '../types'
 import { Logger } from '../util/logger'
+
+// Code actions are derived from real ShellCheck diagnostics and executable
+// documentation is read from the system man pages.
+const describeShellcheck = SHELLCHECK_AVAILABLE ? describe : describe.skip
+const itMan = MAN_AVAILABLE ? it : it.skip
 
 // Skip only the ShellCheck debounce, preserving resource-limit timers.
 const realSetTimeout = global.setTimeout
@@ -327,7 +333,7 @@ describe('server', () => {
     ])
   })
 
-  describe('onCodeAction', () => {
+  describeShellcheck('onCodeAction', () => {
     it('responds to onCodeAction', async () => {
       const { connection, server } = await initializeServer()
       const document = FIXTURE_DOCUMENT.COMMENT_DOC
@@ -1329,7 +1335,7 @@ describe('server', () => {
         {} as any,
       )
     }
-    it('responds with documentation for command', async () => {
+    itMan('responds with documentation for command', async () => {
       const result = await getHoverResult(FIXTURE_URI.INSTALL, {
         // rm
         line: 25,
@@ -1387,25 +1393,28 @@ describe('server', () => {
       `)
     })
 
-    it('returns executable documentation if the function is not redefined', async () => {
-      const result1 = await getHoverResult(FIXTURE_URI.OVERRIDE_SYMBOL, {
-        line: 2,
-        character: 1,
-      })
-      expect(result1).toEqual({
-        contents: {
-          kind: 'markdown',
-          value: expect.stringContaining('list directory contents'),
-        },
-      })
+    itMan(
+      'returns executable documentation if the function is not redefined',
+      async () => {
+        const result1 = await getHoverResult(FIXTURE_URI.OVERRIDE_SYMBOL, {
+          line: 2,
+          character: 1,
+        })
+        expect(result1).toEqual({
+          contents: {
+            kind: 'markdown',
+            value: expect.stringContaining('list directory contents'),
+          },
+        })
 
-      // return null same result if the cursor is on the arguments
-      const result2 = await getHoverResult(FIXTURE_URI.OVERRIDE_SYMBOL, {
-        line: 2,
-        character: 3,
-      })
-      expect(result2).toEqual(null)
-    })
+        // return null same result if the cursor is on the arguments
+        const result2 = await getHoverResult(FIXTURE_URI.OVERRIDE_SYMBOL, {
+          line: 2,
+          character: 3,
+        })
+        expect(result2).toEqual(null)
+      },
+    )
 
     it('responds with documentation even if parsing fails', async () => {
       const result = await getHoverResult(FIXTURE_URI.MISSING_NODE, {

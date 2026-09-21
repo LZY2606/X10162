@@ -2,8 +2,12 @@ import * as path from 'path'
 import { TextDocument } from 'vscode-languageserver-textdocument'
 
 import { FIXTURE_DOCUMENT, FIXTURE_FOLDER } from '../../../../testing/fixtures'
+import { SHELLCHECK_AVAILABLE } from '../../../../testing/tools'
 import { Logger } from '../../util/logger'
 import { Linter } from '../index'
+
+// Linting assertions require the actual ShellCheck executable.
+const itShellcheck = SHELLCHECK_AVAILABLE ? it : it.skip
 
 jest.spyOn(Logger.prototype, 'log').mockImplementation(() => {
   // noop
@@ -66,7 +70,7 @@ describe('linter', () => {
     )
   })
 
-  it('should lint when shellcheck is present', async () => {
+  itShellcheck('should lint when shellcheck is present', async () => {
     // prettier-ignore
     const shell = [
       '#!/bin/bash',
@@ -223,7 +227,7 @@ describe('linter', () => {
     })
   })
 
-  it('should fail to follow sources with incorrect cwd', async () => {
+  itShellcheck('should fail to follow sources with incorrect cwd', async () => {
     const [result] = await getLintingResult({
       cwd: path.resolve(path.join(FIXTURE_FOLDER, '../')),
       document: FIXTURE_DOCUMENT.SHELLCHECK_SOURCE,

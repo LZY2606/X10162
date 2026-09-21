@@ -23,10 +23,21 @@
 | External tools | `server/src/shellcheck/` and `server/src/shfmt/` |
 | Configuration | `server/src/config.ts`; VS Code settings in `vscode-client/package.json` |
 | VS Code extension | `vscode-client/src/`: client lifecycle and server startup |
-| Test support | `testing/fixtures/`, `testing/fixtures.ts`, `testing/mocks.ts`; tests beside code in `__tests__/` |
+| Test support | `testing/fixtures/`, `testing/fixtures.ts`, `testing/mocks.ts`, `testing/tools.ts` (optional-tool detection); tests beside code in `__tests__/` |
 
 ## Validation
 
+- Run `pnpm run verify:offline` for the full offline gate: locked dependency
+  install, lint, typecheck, unit tests, server build, bundled tree-sitter wasm
+  check, a real stdio LSP smoke session against `testing/verify-workspace/`,
+  and publish package content checks. It needs no network and no ShellCheck,
+  shfmt or man pages; the smoke session isolates an empty PATH so those
+  capabilities must degrade per protocol. Results land in
+  `artifacts/verify-manifest.json` and `artifacts/lsp-smoke.json`
+  (normalized, no absolute paths or timestamps).
+- Jest tests that need optional external tools self-skip when the tool is not
+  on `PATH` (see `testing/tools.ts`). CI runs them in a dedicated job with
+  ShellCheck and shfmt installed, so do not remove the tools from that job.
 - During development, run the relevant Jest file or test name. For example:
 
   ```sh

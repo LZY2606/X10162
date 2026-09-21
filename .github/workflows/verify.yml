@@ -3,7 +3,40 @@ name: Verify changes
 on: [pull_request]
 
 jobs:
-  verify:
+  # Shared offline gate: locked dependencies, lint, typecheck, unit tests,
+  # server build, a real stdio LSP smoke session and package content checks.
+  # No external tools (ShellCheck, shfmt, man pages) or network are required;
+  # capabilities that need them must degrade per protocol.
+  verify-offline:
+
+    runs-on: ubuntu-latest
+
+    name: verify (offline)
+
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: pnpm/action-setup@v6
+
+      - name: Use Node.js 22.x
+        uses: actions/setup-node@v7
+        with:
+          cache: "pnpm"
+          node-version: 22.x
+
+      - name: Verify offline
+        run: pnpm run verify:offline
+
+      - name: Upload verification artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: verify-offline-artifacts
+          path: artifacts/
+          if-no-files-found: ignore
+
+  # Tests that genuinely need the external tools installed.
+  verify-external-tools:
 
     runs-on: ubuntu-latest
 
@@ -58,7 +91,8 @@ jobs:
 
   all-done:
     needs:
-      - verify
+      - verify-offline
+      - verify-external-tools
     runs-on: ubuntu-latest
     steps:
     - run: echo "All jobs completed"
