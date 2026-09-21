@@ -1,6 +1,7 @@
 /* eslint-disable no-useless-escape */
 import * as ChildProcess from 'child_process'
 
+import { skipIfToolsUnavailable } from '../../../../testing/external-tools'
 import * as sh from '../sh'
 
 describe('execShellScript', () => {
@@ -23,12 +24,14 @@ describe('getDocumentation', () => {
   })
 
   it('returns documentation string for a known builtin', async () => {
+    if (skipIfToolsUnavailable('bash', 'col', 'help')) return
     const result = (await sh.getShellDocumentation({ word: 'exit' })) as string
     const firstLine = result.split('\n')[0]
     expect(firstLine).toEqual('exit: exit [n]')
   })
 
   it('returns documentation string (man page) for known command', async () => {
+    if (skipIfToolsUnavailable('col', 'man')) return
     const result = (await sh.getShellDocumentation({ word: 'ls' })) as string
     const lines = result.split('\n')
     expect(lines[0]).toEqual('NAME')
@@ -36,11 +39,13 @@ describe('getDocumentation', () => {
   })
 
   it('returns the external manual for an absolute command path', async () => {
+    if (skipIfToolsUnavailable('col', 'man')) return
     const result = await sh.getShellDocumentation({ word: '/bin/ls' })
     expect(result).toContain('list directory contents')
   })
 
   it('normalizes absolute paths before checking spaces', async () => {
+    if (skipIfToolsUnavailable('col', 'man')) return
     const result = await sh.getShellDocumentation({ word: '/opt/My Tools/ls' })
     expect(result).toContain('list directory contents')
   })

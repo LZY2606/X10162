@@ -9,6 +9,14 @@
   "bin": {
     "bash-language-server": "out/cli.js"
   },
+  "files": [
+    "out/**/*.js",
+    "out/**/*.d.ts",
+    "out/get-options.sh",
+    "tree-sitter-bash.wasm",
+    "README.md",
+    "CHANGELOG.md"
+  ],
   "repository": {
     "type": "git",
     "url": "git+https://github.com/bash-lsp/bash-language-server.git"

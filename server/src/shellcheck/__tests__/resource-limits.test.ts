@@ -2,6 +2,7 @@ import * as childProcess from 'node:child_process'
 
 import { TextDocument } from 'vscode-languageserver-textdocument'
 
+import { skipIfToolsUnavailable } from '../../../../testing/external-tools'
 import { Logger } from '../../util/logger'
 import { Linter } from '../index'
 
@@ -248,6 +249,7 @@ describe('ShellCheck resource limits', () => {
   itPosix(
     'kills same-group descendants even when their output does not keep the wrapper open',
     async () => {
+      if (skipIfToolsUnavailable('ps')) return
       const checker = linter(1, 1000)
       const expired = checker.lint(document('wrapper separate-output', 'wrapper'), [])
       jest.advanceTimersByTime(500)

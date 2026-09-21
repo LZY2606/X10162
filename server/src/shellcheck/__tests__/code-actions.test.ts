@@ -4,9 +4,12 @@ import * as LSP from 'vscode-languageserver/node'
 import { TextDocument } from 'vscode-languageserver-textdocument'
 import { Parser } from 'web-tree-sitter'
 
+import { isToolAvailable } from '../../../../testing/external-tools'
 import { initializeParser } from '../../parser'
 import { getCodeActions } from '../code-actions'
 import { ShellCheckResult } from '../types'
+
+const describeShellCheck = isToolAvailable('shellcheck') ? describe : describe.skip
 
 const URI = 'file:///disable-actions.sh'
 let parser: Parser
@@ -73,7 +76,7 @@ function apply(document: TextDocument, action: LSP.CodeAction): string {
   return TextDocument.applyEdits(document, action.edit!.changes![URI])
 }
 
-describe('ShellCheck suppression actions', () => {
+describeShellCheck('ShellCheck suppression actions', () => {
   it.each([
     ['simple command', 'echo "$foo"', '# shellcheck disable=SC2154\necho "$foo"'],
     [

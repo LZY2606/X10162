@@ -1,6 +1,7 @@
 import { FormattingOptions } from 'vscode-languageserver/node'
 import { TextDocument } from 'vscode-languageserver-textdocument'
 
+import { isToolAvailable } from '../../../../testing/external-tools'
 import { FIXTURE_DOCUMENT, FIXTURE_FOLDER } from '../../../../testing/fixtures'
 import { ShfmtConfig } from '../../config'
 import { Logger } from '../../util/logger'
@@ -10,6 +11,8 @@ jest.spyOn(Logger.prototype, 'log').mockImplementation(() => {
   // noop
 })
 const loggerWarn = jest.spyOn(Logger.prototype, 'warn')
+
+const itWithShfmt = isToolAvailable('shfmt') ? it : it.skip
 
 const FIXTURE_DOCUMENT_URI = `file://${FIXTURE_FOLDER}/foo.sh`
 function textToDoc(txt: string) {
@@ -71,7 +74,7 @@ describe('formatter', () => {
     )
   })
 
-  it('should throw when formatting fails', async () => {
+  itWithShfmt('should throw when formatting fails', async () => {
     await expect(async () => {
       await getFormattingResult({ document: FIXTURE_DOCUMENT.PARSE_PROBLEMS })
     }).rejects.toThrow(
@@ -79,7 +82,7 @@ describe('formatter', () => {
     )
   })
 
-  it('should throw when parsing using the wrong language dialect', async () => {
+  itWithShfmt('should throw when parsing using the wrong language dialect', async () => {
     await expect(async () => {
       await getFormattingResult({
         document: FIXTURE_DOCUMENT.SHFMT,
@@ -90,7 +93,7 @@ describe('formatter', () => {
     )
   })
 
-  it('should format when shfmt is present', async () => {
+  itWithShfmt('should format when shfmt is present', async () => {
     const [result] = await getFormattingResult({ document: FIXTURE_DOCUMENT.SHFMT })
     expect(result).toMatchInlineSnapshot(`
       [
@@ -138,7 +141,7 @@ describe('formatter', () => {
     `)
   })
 
-  it('should format using tabs when insertSpaces is false', async () => {
+  itWithShfmt('should format using tabs when insertSpaces is false', async () => {
     const [result] = await getFormattingResult({
       document: FIXTURE_DOCUMENT.SHFMT,
       formatOptions: { tabSize: 4, insertSpaces: false },
@@ -189,7 +192,7 @@ describe('formatter', () => {
     `)
   })
 
-  it('should format using spaces when insertSpaces is true', async () => {
+  itWithShfmt('should format using spaces when insertSpaces is true', async () => {
     const [result] = await getFormattingResult({
       document: FIXTURE_DOCUMENT.SHFMT,
       formatOptions: { tabSize: 3, insertSpaces: true },
@@ -240,13 +243,15 @@ describe('formatter', () => {
     `)
   })
 
-  it('should format with operators at the start of the line when binaryNextLine is true', async () => {
-    const [result] = await getFormattingResult({
-      document: FIXTURE_DOCUMENT.SHFMT,
-      formatOptions: { tabSize: 2, insertSpaces: true },
-      shfmtConfig: makeShfmtConfig({ binaryNextLine: true }),
-    })
-    expect(result).toMatchInlineSnapshot(`
+  itWithShfmt(
+    'should format with operators at the start of the line when binaryNextLine is true',
+    async () => {
+      const [result] = await getFormattingResult({
+        document: FIXTURE_DOCUMENT.SHFMT,
+        formatOptions: { tabSize: 2, insertSpaces: true },
+        shfmtConfig: makeShfmtConfig({ binaryNextLine: true }),
+      })
+      expect(result).toMatchInlineSnapshot(`
       [
         {
           "newText": "#!/bin/bash
@@ -290,15 +295,18 @@ describe('formatter', () => {
         },
       ]
     `)
-  })
+    },
+  )
 
-  it('should format with case patterns indented when caseIndent is true', async () => {
-    const [result] = await getFormattingResult({
-      document: FIXTURE_DOCUMENT.SHFMT,
-      formatOptions: { tabSize: 2, insertSpaces: true },
-      shfmtConfig: makeShfmtConfig({ caseIndent: true }),
-    })
-    expect(result).toMatchInlineSnapshot(`
+  itWithShfmt(
+    'should format with case patterns indented when caseIndent is true',
+    async () => {
+      const [result] = await getFormattingResult({
+        document: FIXTURE_DOCUMENT.SHFMT,
+        formatOptions: { tabSize: 2, insertSpaces: true },
+        shfmtConfig: makeShfmtConfig({ caseIndent: true }),
+      })
+      expect(result).toMatchInlineSnapshot(`
       [
         {
           "newText": "#!/bin/bash
@@ -342,15 +350,18 @@ describe('formatter', () => {
         },
       ]
     `)
-  })
+    },
+  )
 
-  it('should format with function opening braces on a separate line when funcNextLine is true', async () => {
-    const [result] = await getFormattingResult({
-      document: FIXTURE_DOCUMENT.SHFMT,
-      formatOptions: { tabSize: 2, insertSpaces: true },
-      shfmtConfig: makeShfmtConfig({ funcNextLine: true }),
-    })
-    expect(result).toMatchInlineSnapshot(`
+  itWithShfmt(
+    'should format with function opening braces on a separate line when funcNextLine is true',
+    async () => {
+      const [result] = await getFormattingResult({
+        document: FIXTURE_DOCUMENT.SHFMT,
+        formatOptions: { tabSize: 2, insertSpaces: true },
+        shfmtConfig: makeShfmtConfig({ funcNextLine: true }),
+      })
+      expect(result).toMatchInlineSnapshot(`
       [
         {
           "newText": "#!/bin/bash
@@ -395,15 +406,18 @@ describe('formatter', () => {
         },
       ]
     `)
-  })
+    },
+  )
 
-  it('should format with padding kept as-is when keepPadding is true', async () => {
-    const [result] = await getFormattingResult({
-      document: FIXTURE_DOCUMENT.SHFMT,
-      formatOptions: { tabSize: 2, insertSpaces: true },
-      shfmtConfig: makeShfmtConfig({ keepPadding: true }),
-    })
-    expect(result).toMatchInlineSnapshot(`
+  itWithShfmt(
+    'should format with padding kept as-is when keepPadding is true',
+    async () => {
+      const [result] = await getFormattingResult({
+        document: FIXTURE_DOCUMENT.SHFMT,
+        formatOptions: { tabSize: 2, insertSpaces: true },
+        shfmtConfig: makeShfmtConfig({ keepPadding: true }),
+      })
+      expect(result).toMatchInlineSnapshot(`
       [
         {
           "newText": "#!/bin/bash
@@ -447,15 +461,18 @@ describe('formatter', () => {
         },
       ]
     `)
-  })
+    },
+  )
 
-  it('should format after simplifying the code when simplifyCode is true', async () => {
-    const [result] = await getFormattingResult({
-      document: FIXTURE_DOCUMENT.SHFMT,
-      formatOptions: { tabSize: 2, insertSpaces: true },
-      shfmtConfig: makeShfmtConfig({ simplifyCode: true }),
-    })
-    expect(result).toMatchInlineSnapshot(`
+  itWithShfmt(
+    'should format after simplifying the code when simplifyCode is true',
+    async () => {
+      const [result] = await getFormattingResult({
+        document: FIXTURE_DOCUMENT.SHFMT,
+        formatOptions: { tabSize: 2, insertSpaces: true },
+        shfmtConfig: makeShfmtConfig({ simplifyCode: true }),
+      })
+      expect(result).toMatchInlineSnapshot(`
       [
         {
           "newText": "#!/bin/bash
@@ -499,15 +516,18 @@ describe('formatter', () => {
         },
       ]
     `)
-  })
+    },
+  )
 
-  it('should format with redirect operators followed by a space when spaceRedirects is true', async () => {
-    const [result] = await getFormattingResult({
-      document: FIXTURE_DOCUMENT.SHFMT,
-      formatOptions: { tabSize: 2, insertSpaces: true },
-      shfmtConfig: makeShfmtConfig({ spaceRedirects: true }),
-    })
-    expect(result).toMatchInlineSnapshot(`
+  itWithShfmt(
+    'should format with redirect operators followed by a space when spaceRedirects is true',
+    async () => {
+      const [result] = await getFormattingResult({
+        document: FIXTURE_DOCUMENT.SHFMT,
+        formatOptions: { tabSize: 2, insertSpaces: true },
+        shfmtConfig: makeShfmtConfig({ spaceRedirects: true }),
+      })
+      expect(result).toMatchInlineSnapshot(`
       [
         {
           "newText": "#!/bin/bash
@@ -551,22 +571,25 @@ describe('formatter', () => {
         },
       ]
     `)
-  })
+    },
+  )
 
-  it('should format with all options enabled when multiple config settings are combined', async () => {
-    const [result] = await getFormattingResult({
-      document: FIXTURE_DOCUMENT.SHFMT,
-      formatOptions: { tabSize: 2, insertSpaces: true },
-      shfmtConfig: makeShfmtConfig({
-        binaryNextLine: true,
-        caseIndent: true,
-        funcNextLine: true,
-        keepPadding: true,
-        simplifyCode: true,
-        spaceRedirects: true,
-      }),
-    })
-    expect(result).toMatchInlineSnapshot(`
+  itWithShfmt(
+    'should format with all options enabled when multiple config settings are combined',
+    async () => {
+      const [result] = await getFormattingResult({
+        document: FIXTURE_DOCUMENT.SHFMT,
+        formatOptions: { tabSize: 2, insertSpaces: true },
+        shfmtConfig: makeShfmtConfig({
+          binaryNextLine: true,
+          caseIndent: true,
+          funcNextLine: true,
+          keepPadding: true,
+          simplifyCode: true,
+          spaceRedirects: true,
+        }),
+      })
+      expect(result).toMatchInlineSnapshot(`
       [
         {
           "newText": "#!/bin/bash
@@ -611,21 +634,24 @@ describe('formatter', () => {
         },
       ]
     `)
-  })
+    },
+  )
 
-  it('should format with a combination of options and additionalArguments', async () => {
-    const [result] = await getFormattingResult({
-      document: FIXTURE_DOCUMENT.SHFMT,
-      formatOptions: { tabSize: 2, insertSpaces: true },
-      shfmtConfig: makeShfmtConfig({
-        caseIndent: true,
-        keepPadding: true,
-        simplifyCode: true,
-        spaceRedirects: true,
-        additionalArguments: ['--binary-next-line', '--func-next-line'],
-      }),
-    })
-    expect(result).toMatchInlineSnapshot(`
+  itWithShfmt(
+    'should format with a combination of options and additionalArguments',
+    async () => {
+      const [result] = await getFormattingResult({
+        document: FIXTURE_DOCUMENT.SHFMT,
+        formatOptions: { tabSize: 2, insertSpaces: true },
+        shfmtConfig: makeShfmtConfig({
+          caseIndent: true,
+          keepPadding: true,
+          simplifyCode: true,
+          spaceRedirects: true,
+          additionalArguments: ['--binary-next-line', '--func-next-line'],
+        }),
+      })
+      expect(result).toMatchInlineSnapshot(`
       [
         {
           "newText": "#!/bin/bash
@@ -670,25 +696,29 @@ describe('formatter', () => {
         },
       ]
     `)
-  })
+    },
+  )
 
-  it('should omit filename from the shfmt command when it cannot be determined', async () => {
-    // There's no easy way to see what filename has been passed to shfmt without inspecting the
-    // contents of the logs. As a workaround, we set a non-file:// URI on a dodgy document to
-    // trigger an exception and inspect the error message.
-    const testDocument = TextDocument.create(
-      'http://localhost/',
-      'shellscript',
-      0,
-      FIXTURE_DOCUMENT.PARSE_PROBLEMS.getText(),
-    )
+  itWithShfmt(
+    'should omit filename from the shfmt command when it cannot be determined',
+    async () => {
+      // There's no easy way to see what filename has been passed to shfmt without inspecting the
+      // contents of the logs. As a workaround, we set a non-file:// URI on a dodgy document to
+      // trigger an exception and inspect the error message.
+      const testDocument = TextDocument.create(
+        'http://localhost/',
+        'shellscript',
+        0,
+        FIXTURE_DOCUMENT.PARSE_PROBLEMS.getText(),
+      )
 
-    await expect(async () => {
-      await getFormattingResult({ document: testDocument })
-    }).rejects.toThrow(
-      /Shfmt: exited with status 1: <standard input>:10:1: [`"']?>[`"']? must be followed by a word/,
-    )
-  })
+      await expect(async () => {
+        await getFormattingResult({ document: testDocument })
+      }).rejects.toThrow(
+        /Shfmt: exited with status 1: <standard input>:10:1: [`"']?>[`"']? must be followed by a word/,
+      )
+    },
+  )
 
   describe('getShfmtArguments()', () => {
     const lspShfmtConfig = makeShfmtConfig({

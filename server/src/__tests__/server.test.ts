@@ -6,6 +6,7 @@ import { fileURLToPath, pathToFileURL } from 'node:url'
 import * as LSP from 'vscode-languageserver/node'
 import { TextDocument } from 'vscode-languageserver-textdocument'
 
+import { skipIfToolsUnavailable } from '../../../testing/external-tools'
 import {
   FIXTURE_DOCUMENT,
   FIXTURE_FOLDER,
@@ -329,6 +330,7 @@ describe('server', () => {
 
   describe('onCodeAction', () => {
     it('responds to onCodeAction', async () => {
+      if (skipIfToolsUnavailable('shellcheck')) return
       const { connection, server } = await initializeServer()
       const document = FIXTURE_DOCUMENT.COMMENT_DOC
 
@@ -384,6 +386,7 @@ describe('server', () => {
     })
 
     it('offers suppression without an automatic fix and ignores unknown diagnostics', async () => {
+      if (skipIfToolsUnavailable('shellcheck')) return
       const { connection, server } = await initializeServer()
       const document = TextDocument.create(
         FIXTURE_URI.COMMENT_DOC,
@@ -425,6 +428,7 @@ describe('server', () => {
     })
 
     it('deduplicates suppressions while preserving distinct fixes and command scopes', async () => {
+      if (skipIfToolsUnavailable('shellcheck')) return
       const { connection, server } = await initializeServer()
       const document = TextDocument.create(
         FIXTURE_URI.COMMENT_DOC,
@@ -544,6 +548,7 @@ describe('server', () => {
     })
 
     it('responds to onCompletion with filtered list when word is found', async () => {
+      if (skipIfToolsUnavailable('rm')) return
       const { connection } = await initializeServer()
 
       const onCompletion = connection.onCompletion.mock.calls[0][0]
@@ -925,6 +930,7 @@ describe('server', () => {
 
   describe('onCompletionResolve', () => {
     it('resolves documentation for buitins', async () => {
+      if (skipIfToolsUnavailable('bash', 'col', 'help')) return
       const { connection } = await initializeServer({ rootPath: REPO_ROOT_FOLDER })
 
       const onCompletionResolve = connection.onCompletionResolve.mock.calls[0][0]
@@ -1330,6 +1336,7 @@ describe('server', () => {
       )
     }
     it('responds with documentation for command', async () => {
+      if (skipIfToolsUnavailable('col', 'man')) return
       const result = await getHoverResult(FIXTURE_URI.INSTALL, {
         // rm
         line: 25,
@@ -1388,6 +1395,7 @@ describe('server', () => {
     })
 
     it('returns executable documentation if the function is not redefined', async () => {
+      if (skipIfToolsUnavailable('col', 'man')) return
       const result1 = await getHoverResult(FIXTURE_URI.OVERRIDE_SYMBOL, {
         line: 2,
         character: 1,
@@ -1408,6 +1416,7 @@ describe('server', () => {
     })
 
     it('responds with documentation even if parsing fails', async () => {
+      if (skipIfToolsUnavailable('bash', 'col', 'help')) return
       const result = await getHoverResult(FIXTURE_URI.MISSING_NODE, {
         // echo
         line: 11,

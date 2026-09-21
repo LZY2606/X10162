@@ -1,6 +1,7 @@
 import * as path from 'path'
 import { TextDocument } from 'vscode-languageserver-textdocument'
 
+import { skipIfToolsUnavailable } from '../../../../testing/external-tools'
 import { FIXTURE_DOCUMENT, FIXTURE_FOLDER } from '../../../../testing/fixtures'
 import { Logger } from '../../util/logger'
 import { Linter } from '../index'
@@ -67,6 +68,7 @@ describe('linter', () => {
   })
 
   it('should lint when shellcheck is present', async () => {
+    if (skipIfToolsUnavailable('shellcheck')) return
     // prettier-ignore
     const shell = [
       '#!/bin/bash',
@@ -224,6 +226,7 @@ describe('linter', () => {
   })
 
   it('should fail to follow sources with incorrect cwd', async () => {
+    if (skipIfToolsUnavailable('shellcheck')) return
     const [result] = await getLintingResult({
       cwd: path.resolve(path.join(FIXTURE_FOLDER, '../')),
       document: FIXTURE_DOCUMENT.SHELLCHECK_SOURCE,

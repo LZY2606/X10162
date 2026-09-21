@@ -4,6 +4,7 @@ import { join } from 'node:path'
 
 import { TextDocument } from 'vscode-languageserver-textdocument'
 
+import { skipIfToolsUnavailable } from '../../../testing/external-tools'
 import { getMockConnection } from '../../../testing/mocks'
 import LspServer from '../server'
 import * as sh from '../util/sh'
@@ -51,6 +52,7 @@ it('looks up documentation for commands invoked by absolute path', async () => {
 })
 
 it('documents a quoted command path containing spaces', async () => {
+  if (skipIfToolsUnavailable('col', 'man')) return
   const directory = await mkdtemp(join(tmpdir(), 'bash-lsp tools-'))
   try {
     const command = join(directory, 'ls')
